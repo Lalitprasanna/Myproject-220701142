@@ -1,0 +1,202 @@
+import java.util.*;
+import java.util.Date;
+
+public class Main {
+    public static void main(String[] args) {
+
+        reservation reservationSystem = new reservation();
+        Scanner input = new Scanner(System.in);
+        int n=input.nextInt();
+        System.out.print("Enter trainNumber:");
+        int tn=input.nextInt();
+        System.out.print("Enter trainName:");
+        String tnName=input.next();
+        System.out.print("Enter source:");
+        String source=input.next();
+        System.out.print("Enter destination:");
+        String destination=input.next();
+        System.out.print("Enter TotalSeat:");
+        int ts=input.nextInt();
+        System.out.print("Enter TotalAvailableSeat:");
+        int tsa=input.nextInt();
+        System.out.print("Enter fare");
+        double fare=input.nextDouble();
+        int r=1;
+        for(int i=1;i<=n;i++) {
+
+
+            Train t1 = new Train(tn, tnName, source, destination, ts, tsa, fare);
+
+            reservationSystem.addTrain(t1);
+        }
+        System.out.print("Enter PassengerName:");
+        String passengerName=input.next();
+        System.out.print("Enter Age:");
+        int age=input.nextInt();
+        System.out.print("Enter Gender:");
+        String gender=input.next();
+        System.out.print("Enter contactNumber:");
+        String contactNumber=input.next();
+        System.out.print("Enter TrainNumber:");
+        int trainNumber=input.nextInt();
+        System.out.print("Enter Seat:");
+        int seat=input.nextInt();
+
+        System.out.println("=== All Trains ===");
+        reservationSystem.showAllTrains();
+        System.out.println("\n=== Search Trains Chennai → Bangalore ===");
+        reservationSystem.searchTrains("Chennai", "Bangalore");
+        passenger p1 = new passenger(r++, passengerName, age, gender, contactNumber);
+        System.out.println("\n=== Booking Ticket ===");
+        reservationSystem.bookTicket(p1, trainNumber, seat); // 2 seats on Train 101
+
+        System.out.println("\n=== All Bookings ===");
+        reservationSystem.showAllBookings();
+    }
+}
+
+class Train{
+    private int TrainNumber;
+    private String TrainName;
+    private String source;
+    private String destination;
+    private int totalseat;
+    private int availableseats;
+    public double fare;
+    public Train(int trainNumber, String trainName, String source, String destination, int totalseat, int availableseats, double fare) {
+        this.TrainNumber = trainNumber;
+        this.TrainName = trainName;
+        this.source = source;
+        this.destination = destination;
+        this.totalseat = totalseat;
+        this.availableseats = availableseats;
+        this.fare = fare;
+    }
+    public void showDetails(){
+        System.out.println("Train Number: " + TrainNumber);
+        System.out.println("Train Name: " + TrainName);
+        System.out.println("Source: " + source);
+        System.out.println("Destination: " + destination);
+        System.out.println("Total Seats: " + totalseat);
+        System.out.println("Available Seats: " + availableseats);
+        System.out.println("Fare: " + fare);
+    }
+    public boolean bookseat(int seat){
+        if(seat <= availableseats){
+            availableseats = availableseats - seat;
+            return true;
+        }
+        return false;
+    }
+    public double calculatefare(int seats){
+        double pricePerSeat = 500.0; // Example fixed fare
+        fare = seats * pricePerSeat;
+        return fare;
+    }
+
+    public int getTrainNumber(){ return TrainNumber; }
+    public String getSource(){ return source; }
+    public String getDestination(){ return destination; }
+}
+class passenger{
+    private int passengerId;
+    private String passengerName;
+    private int age;
+    private String gender;
+    private String ContactNumber;
+    public passenger(int passengerId, String passengerName, int  age, String gender, String contactNumber){
+        this.passengerId = passengerId;
+        this.passengerName = passengerName;
+        this.age=age;
+        this.gender = gender;
+        this.ContactNumber = contactNumber;
+    }
+    public void ShowDetails(){
+        System.out.println("Passenger ID: " + passengerId);
+        System.out.println("Passenger Name: " + passengerName);
+        System.out.println("Age: " + age);
+        System.out.println("Gender: " + gender);
+        System.out.println("ContactNumber: " + ContactNumber);
+    }
+}
+class ticket{
+    private int ticketId;
+    private Train Train;
+    private passenger passenger;
+    private int seats;
+    private Date bookingDate;
+    public String status;
+    public ticket(int ticketId,Train train,passenger passenger,int seats,Date bookingDate,String status){
+        this.ticketId = ticketId;
+        this.Train = train;
+        this.passenger = passenger;
+        this.seats = seats;
+        // Option 1: Use the passed value
+        this.bookingDate = bookingDate;
+        this.status = status;
+    }
+    public int getTicketId(){ return ticketId; }
+    public void showDetails() {
+        System.out.println("Ticket ID: " + ticketId);
+        System.out.println("Train ID: " + Train.getTrainNumber());
+        System.out.println("seats: " + seats);
+        System.out.println("booking date: " + bookingDate);
+        System.out.println("status: " + status);
+    }
+    public Train getTrain(){ return Train; }
+}
+class reservation{
+    private List<Train> trains=new ArrayList<Train>();
+    private List<ticket> tickets=new ArrayList<>();
+    private int ticketCounter=1;
+    public void addTrain(Train train){
+        trains.add(train);
+    }
+    public void searchTrains(String source, String destination){
+        for (Train train : trains) {
+            if (train.getSource().equalsIgnoreCase(source) && train.getDestination().equalsIgnoreCase(destination)) {
+                train.showDetails();
+            }
+        }
+    }
+
+    public void searchTrain(String source, String destination){
+
+    }
+    public void bookTicket(passenger passenger,int trainNumber,int seats){
+        for(Train train:trains){
+            if(train.getTrainNumber()==trainNumber){
+                if (train.bookseat(seats)){
+                    double fare = train.calculatefare(seats);
+                    ticket ticket=new ticket(ticketCounter++,train, passenger,seats,new Date(),"CONFIRMED");
+                    tickets.add(ticket);
+                    System.out.println("Ticket booked successfully");
+                    ticket.showDetails();
+                }
+                else {
+                    System.out.println("Ticket Not booked successfully");
+                }
+                return;
+            }
+        }
+        System.out.println("Train Not Found");
+    }
+    public void showDetails(passenger passenger,int trainNumber,int seats){
+
+    }
+    public void cancelTicket(){
+
+    }
+    public void showAllTrains(){
+        for(Train train:trains){
+            train.showDetails();
+            System.out.println("------------------------");
+        }
+    }
+    public void showAllBookings() {
+        for(ticket ticket:tickets){
+            ticket.showDetails();
+            System.out.println("-----------------------");
+        }
+    }
+}
